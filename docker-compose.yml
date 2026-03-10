@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: agentic-foundry-mongodb
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: agentic-foundry-redis
+    ports:
+      - "6380:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "8001:8000"
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: docker/streamlit.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+
+volumes:
+  mongodb_data:
